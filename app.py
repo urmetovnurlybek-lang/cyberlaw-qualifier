@@ -1,4 +1,4 @@
-"""Экспертная система «Юридический квалификатор киберпреступлений» (Tkinter)."""
+"""Сараптамалық жүйе «Киберқылмыстардың құқықтық квалификаторы» (Tkinter)."""
 import tkinter as tk
 from tkinter import ttk
 
@@ -8,47 +8,49 @@ from rules import FLAGS, SCENARIOS, qualify, format_verdict
 class CyberLawApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        root.title("Экспертная система: квалификация киберпреступлений (УК РК)")
-        root.geometry("820x860")
+        root.title("Сараптамалық жүйе: киберқылмыстарды квалификациялау (ҚР ҚК)")
+        root.geometry("820x900")
 
-        ttk.Label(root, text="Анализ и юридическая оценка инцидента",
+        ttk.Label(root, text="Оқиғаны талдау және құқықтық бағалау",
                   font=("Arial", 14, "bold")).pack(pady=8)
 
-        # --- готовые сценарии (удобно для тестирования и скриншотов)
+        # --- дайын сценарийлер (тестілеу және скриншот үшін ыңғайлы)
         top = ttk.Frame(root)
         top.pack(fill="x", padx=15)
-        ttk.Label(top, text="Готовый сценарий:").pack(side="left")
+        ttk.Label(top, text="Дайын сценарий:").pack(side="left")
         self.scenario = ttk.Combobox(top, values=list(SCENARIOS), state="readonly", width=40)
         self.scenario.pack(side="left", padx=8)
-        ttk.Button(top, text="Загрузить", command=self.load_scenario).pack(side="left")
+        ttk.Button(top, text="Жүктеу", command=self.load_scenario).pack(side="left")
 
-        # --- признаки
-        frame = ttk.LabelFrame(root, text="Параметры происшествия")
+        # --- белгілер
+        frame = ttk.LabelFrame(root, text="Оқиға параметрлері")
         frame.pack(fill="x", padx=15, pady=10)
         self.vars = {}
         for key, text in FLAGS:
             self.vars[key] = tk.BooleanVar()
             ttk.Checkbutton(frame, text=text, variable=self.vars[key]).pack(anchor="w", padx=8, pady=2)
 
-        # --- кнопки
+        # --- батырмалар
         btns = ttk.Frame(root)
         btns.pack(pady=6)
-        ttk.Button(btns, text="Квалифицировать инцидент", command=self.analyze).pack(side="left", padx=5)
-        ttk.Button(btns, text="Сбросить", command=self.reset).pack(side="left", padx=5)
+        ttk.Button(btns, text="Оқиғаны квалификациялау", command=self.analyze).pack(side="left", padx=5)
+        ttk.Button(btns, text="Тазалау", command=self.reset).pack(side="left", padx=5)
 
-        # --- результат
-        out = ttk.LabelFrame(root, text="Заключение")
+        # --- нәтиже
+        out = ttk.LabelFrame(root, text="Қорытынды")
         out.pack(fill="both", expand=True, padx=15, pady=10)
-        self.text = tk.Text(out, wrap="word", font=("Consolas", 10), height=16)
+        self.text = tk.Text(out, wrap="word", font=("Consolas", 10), height=18)
         scroll = ttk.Scrollbar(out, command=self.text.yview)
         self.text.configure(yscrollcommand=scroll.set)
         scroll.pack(side="right", fill="y")
         self.text.pack(fill="both", expand=True)
 
     def selected(self) -> set:
+        """Белгіленген белгілердің жиынын қайтарады."""
         return {k for k, v in self.vars.items() if v.get()}
 
     def load_scenario(self):
+        """Таңдалған дайын сценарийді жүктейді."""
         name = self.scenario.get()
         if not name:
             return
@@ -57,11 +59,13 @@ class CyberLawApp:
         self.analyze()
 
     def analyze(self):
+        """Оқиғаны квалификациялап, нәтижені шығарады."""
         verdict = qualify(self.selected())
         self.text.delete("1.0", "end")
         self.text.insert("end", format_verdict(verdict))
 
     def reset(self):
+        """Барлық белгілерді тазалайды."""
         for var in self.vars.values():
             var.set(False)
         self.scenario.set("")
